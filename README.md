@@ -1,1 +1,3 @@
 shell redirections
+0x05-processes_and_signals
+0x09-web_infrastructure_design
