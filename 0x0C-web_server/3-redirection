@@ -1,11 +1,33 @@
 #!/usr/bin/env bash
 
 # Replace a line with multiple lines with sed
-sed -i '/location \/redirect_me {/ {
-    s/location \/redirect_me {/location \/redirect_me {
-    return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-    }/g
-}' /etc/nginx/sites-available/default
+sudo apt -y update
+sudo apt -y upgrade
+sudo apt -y install nginx
+sudo service nginx start
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
+sudo echo 'Hello World!' | tee /var/www/html/index.html
 
-# Restart Nginx to apply the changes
-service nginx restart
+sudo chown -R "$USER":"$USER" /etc/nginx/sites-enabled
+sudo chmod -R 755 /etc/nginx/sites-enabled
+
+sudo echo "server {
+        listen 80 default_server;
+	listen [::]:80 default_server;
+
+	root /var/www/html;
+	index index.html index.htm index.nginx-debian.html;
+
+	server_name _;
+
+        locationo = / {
+                try_files /index.html =404;
+        }
+
+	location = /redirect_me {
+	        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+        }
+}" > /etc/nginx/sites-enabled/default
+
+sudo service nginx reload
