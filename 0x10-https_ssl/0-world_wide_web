@@ -1,17 +1,27 @@
 #!/usr/bin/env bash
+#Function to get info for domain and subdomain
 
-# Configurring your domain zone 
+function check_domain {
+	domain_names=("www" "lb-01" "web-01" "web-02")
 
-domain_info () {
-    if [ "$#" -eq 1 ]
-    then
-        dig www."$1" | grep -e ^www | awk '{print "The subdomain www is a", $4, "record and points to", $5}'
-        dig lb-01."$1" | grep -e ^lb-01 | awk '{print "The subdomain lb-01 is a", $4, "record and points to", $5}'
-        dig web-01."$1" | grep -e ^web-01 | awk '{print "The subdomain web-01 is a", $4, "record and points to", $5}'
-        dig web-02."$1" | grep -e ^web-02 | awk '{print "The subdomain web-02 is a", $4, "record and points to", $5}'
-    elif [ "$#" -eq 2 ]
-    then
-        dig "$2"."$1" | grep -e ^"$2" | awk '{print "The subdomain '$2' is a", $4, "record and points to", $5}'
-    fi
+	for i in "${domain_names[@]}";
+	do
+		dig "${i}"."$1" | grep -A1 'ANSWER SECTION:' | \
+		awk 'FNR == 2 {printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$i"
+	done
 }
-domain_info $1 $2
+
+function check_subdomain {
+	dig "${2}"."$1" | grep -A1 'ANSWER SECTION:' | \
+	awk 'FNR == 2 {printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$2"
+}
+
+if [ $# -lt 1 ]
+then
+	echo "*** Provide domain name ***"
+elif [ $# -eq 1 ]
+then
+	check_domain "$1";
+else
+	check_subdomain "$1" "$2";
+fi
