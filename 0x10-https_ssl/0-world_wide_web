@@ -1,40 +1,17 @@
 #!/usr/bin/env bash
 
-# Function to get info for a subdomain
-# shellcheck disable=SC2086
-query_subdomain() {
-    local domain=$1
-    local subdomain=$2
+# Configurring your domain zone 
 
-    dig "$subdomain"."$domain" +short | awk -v sub="$subdomain" '
-    {
-        print "The subdomain", sub, "is an A record and points to", $1
-    }'
+domain_info () {
+    if [ "$#" -eq 1 ]
+    then
+        dig www."$1" | grep -e ^www | awk '{print "The subdomain www is a", $4, "record and points to", $5}'
+        dig lb-01."$1" | grep -e ^lb-01 | awk '{print "The subdomain lb-01 is a", $4, "record and points to", $5}'
+        dig web-01."$1" | grep -e ^web-01 | awk '{print "The subdomain web-01 is a", $4, "record and points to", $5}'
+        dig web-02."$1" | grep -e ^web-02 | awk '{print "The subdomain web-02 is a", $4, "record and points to", $5}'
+    elif [ "$#" -eq 2 ]
+    then
+        dig "$2"."$1" | grep -e ^"$2" | awk '{print "The subdomain '$2' is a", $4, "record and points to", $5}'
+    fi
 }
-
-# Function to get info for default subdomains
-# shellcheck disable=SC2086
-domain_info() {
-    local domain=$1
-
-    for sub in www lb-01 web-01 web-02; do
-        query_subdomain "$domain" "$sub"
-    done
-}
-
-# Ensure the domain parameter is provided
-if [ -z "$1" ]; then
-    echo "Usage: $0 <domain> [subdomain]"
-    exit 1
-fi
-
-# Main logic
-domain=$1
-subdomain=$2
-
-if [ -z "$subdomain" ]; then
-    domain_info "$domain"
-else
-    query_subdomain "$domain" "$subdomain"
-fi
-
+domain_info $1 $2
