@@ -1,17 +1,18 @@
 #!/usr/bin/python3
 import requests
 
-
 def number_of_subscribers(subreddit):
-    """ 
-    Return number of subscribers in a subreddit 
-    """
+    """Return the number of subscribers in a subreddit """
 
-    header = {'User-Agent':  'Chrome/66.0.3359.139 Mobile Safari/537.36'}
-    url = "https://api.reddit.com/r/{}/about/".format(subreddit)
-    response = requests.get(url, headers=header)
-    if response.status_code == 200:
-        subs = response.json()["data"]["subscribers"]
-    else:
-        subs = 0
-    return subs
+    headers = {'User-Agent': 'my_user_agent/0.1 by your_username'}
+    url = "https://www.reddit.com/r/{}/about.json".format(subreddit)
+    
+    try:
+        response = requests.get(url, headers=headers, allow_redirects=False)
+        if response.status_code == 200:
+            return response.json().get("data", {}).get("subscribers", 0)
+        else:
+            return 0
+    except requests.RequestException:
+        return 0
+
