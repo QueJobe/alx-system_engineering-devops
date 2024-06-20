@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+""" fuction to query the redit API"""
+
 import requests
 
 
